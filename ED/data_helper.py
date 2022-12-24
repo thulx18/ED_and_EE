@@ -44,32 +44,8 @@ class DuEEDataset(Dataset):
         examples = []
         for raw in tqdm(raw_data):
             text = raw['text']
-            try:
+            if 'event_list' in raw:
                 event_list = raw['event_list']
-            except KeyError:
-                # Test Data, no event_list, but has trigger_list
-                for trigger in raw['trigger_list']:
-                    trigger_word = trigger['trigger']
-                    offset = len(trigger_word) - len(trigger_word.lstrip())
-                    trigger_word = trigger_word.lstrip()
-                    trigger_start_index = trigger['trigger_start_index'] + offset
-                    trigger_end_index = trigger_start_index + len(trigger_word) + offset
-
-                    tokensL = jieba.lcut(text[:trigger_start_index])
-                    tokensR = jieba.lcut(text[trigger_end_index:])
-                    tokens = tokensL + [trigger] + tokensR
-                    triggerL = len(tokensL)
-                    triggerR = triggerL + 1
-
-                    examples.append({
-                        'text': text,
-                        'tokens': tokens,
-                        'triggerL': triggerL,
-                        'triggerR': triggerR,
-                        'event_type': event_type
-                    })
-            else:
-                # Train/Dev set
                 last_triggerL = 0
                 for event in event_list:
                     event_type = event['event_type']
@@ -115,6 +91,28 @@ class DuEEDataset(Dataset):
                         'triggerR': triggerR,
                         'event_type': event_type
                     })
+            else:
+                # Test Data, no event_list, but has trigger_list
+                for trigger in raw['trigger_list']:
+                    trigger_word = trigger['trigger']
+                    offset = len(trigger_word) - len(trigger_word.lstrip())
+                    trigger_word = trigger_word.lstrip()
+                    trigger_start_index = trigger['trigger_start_index'] + offset
+                    trigger_end_index = trigger_start_index + len(trigger_word) + offset
+
+                    tokensL = jieba.lcut(text[:trigger_start_index])
+                    tokensR = jieba.lcut(text[trigger_end_index:])
+                    tokens = tokensL + [trigger_word] + tokensR
+                    triggerL = len(tokensL)
+                    triggerR = triggerL + 1
+
+                    examples.append({
+                        'text': text,
+                        'tokens': tokens,
+                        'triggerL': triggerL,
+                        'triggerR': triggerR
+                    })
+                
         return examples
     
     def get_features(self, examples):
@@ -145,17 +143,25 @@ class DuEEDataset(Dataset):
             maskL = maskL + [0.] * pad_len
             maskR = maskR + [0.] * pad_len
             # convert event_type to one-hot
-            event_type = [0.] * self.num_class
-            event_type[self.label2id[example['event_type']]] = 1.
-
-            features.append({
-                'input_ids': torch.LongTensor(inputs['input_ids']),
-                'attention_mask': torch.LongTensor(inputs['attention_mask']),
-                'token_type_ids': torch.LongTensor(inputs['token_type_ids']),
-                'maskL': torch.tensor(maskL),
-                'maskR': torch.tensor(maskR),
-                'event_type': torch.tensor(event_type)
-            })
+            if 'event_type' in example:
+                event_type = [0.] * self.num_class
+                event_type[self.label2id[example['event_type']]] = 1.
+                features.append({
+                    'input_ids': torch.LongTensor(inputs['input_ids']),
+                    'attention_mask': torch.LongTensor(inputs['attention_mask']),
+                    'token_type_ids': torch.LongTensor(inputs['token_type_ids']),
+                    'maskL': torch.tensor(maskL),
+                    'maskR': torch.tensor(maskR),
+                    'event_type': torch.tensor(event_type)
+                })
+            else:
+                features.append({
+                    'input_ids': torch.LongTensor(inputs['input_ids']),
+                    'attention_mask': torch.LongTensor(inputs['attention_mask']),
+                    'token_type_ids': torch.LongTensor(inputs['token_type_ids']),
+                    'maskL': torch.tensor(maskL),
+                    'maskR': torch.tensor(maskR)
+                })
         return features
 
     def __len__(self):

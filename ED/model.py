@@ -21,16 +21,8 @@ class DMBERT(nn.Module):
         token_ids = data['input_ids']
         attention_mask = data['attention_mask']
         token_type_ids = data['token_type_ids']
-        try:
-            maskL = data['maskL']
-            maskR = data['maskR']
-        except KeyError:
-            maskL = None
-            maskR = None
-        try:
-            label = data['event_type']
-        except KeyError:
-            label = None
+        maskL, maskR = data['maskL'], data['maskR']
+        label = data['event_type'] if 'event_type' in data else None
         # bert
         outputs = self.bert(token_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
         # dynamic pooling
