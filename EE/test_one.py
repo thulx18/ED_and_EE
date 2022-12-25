@@ -53,8 +53,6 @@ def test_one(
         )
         all_predictions.extend(outputs_gathered)
 
-    ex, ey, ez = 1e-10, 1e-10, 1e-10  # 事件级别
-    ax, ay, az = 1e-10, 1e-10, 1e-10  # 论元级别
 
     if write_predictions:
         pred_dir = os.path.join(args.output_dir, "preds")
@@ -66,33 +64,33 @@ def test_one(
         dev_dataloader.dataset.raw_data["events"],
         dev_dataloader.dataset.raw_data["text"],
     ):
-        R, T = DedupList(), DedupList()
-        # 事件级别
-        for event in pred_events:
-            if any([argu[1] == "触发词" for argu in event]):
-                R.append(list(sorted(event)))
-        for event in events:
-            T.append(list(sorted(event)))
-        for event in R:
-            if event in T:
-                ex += 1
-        ey += len(R)
-        ez += len(T)
-        # 论元级别
-        R, T = DedupList(), DedupList()
-        for event in pred_events:
-            for argu in event:
-                if argu[1] != "触发词":
-                    R.append(argu)
-        for event in events:
-            for argu in event:
-                if argu[1] != "触发词":
-                    T.append(argu)
-        for argu in R:
-            if argu in T:
-                ax += 1
-        ay += len(R)
-        az += len(T)
+        # R, T = DedupList(), DedupList()
+        # # 事件级别
+        # for event in pred_events:
+        #     if any([argu[1] == "触发词" for argu in event]):
+        #         R.append(list(sorted(event)))
+        # for event in events:
+        #     T.append(list(sorted(event)))
+        # for event in R:
+        #     if event in T:
+        #         ex += 1
+        # ey += len(R)
+        # ez += len(T)
+        # # 论元级别
+        # R, T = DedupList(), DedupList()
+        # for event in pred_events:
+        #     for argu in event:
+        #         if argu[1] != "触发词":
+        #             R.append(argu)
+        # for event in events:
+        #     for argu in event:
+        #         if argu[1] != "触发词":
+        #             T.append(argu)
+        # for argu in R:
+        #     if argu in T:
+        #         ax += 1
+        # ay += len(R)
+        # az += len(T)
 
         if write_predictions:
             event_list = DedupList()

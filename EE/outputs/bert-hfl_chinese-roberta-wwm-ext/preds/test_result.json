@@ -1,0 +1,2 @@
+{"text": "截至6月18日13时20分，四川省宜宾市长宁县6.0级地震已造成13人遇难。", "event_list": [{"event_type": "灾害/意外-地震", "trigger": "地震", "trigger_start_index": "27", "arguments": [{"role": "死亡人数", "argument": "13人"}, {"role": "震级", "argument": "6.0级"}]}]}
+{"text": "截至6月18日13时20分，四川省宜宾市长宁县6.0级地震已造成13人遇难。", "event_list": [{"event_type": "灾害/意外-地震", "trigger": "地震", "trigger_start_index": "27", "arguments": [{"role": "死亡人数", "argument": "13人"}, {"role": "震级", "argument": "6.0级"}]}]}
