@@ -2,7 +2,7 @@
 
 #### 1. 数据集
 
-- **DuEE：** 
+- **DuEE：** [Here](https://aistudio.baidu.com/aistudio/datasetdetail/80850)
 
 #### 2. 预训练模型
 
