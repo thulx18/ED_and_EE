@@ -48,7 +48,7 @@ def test_one(
             accelerator.gather(outputs),
             offset_mappings,
             texts,
-            trigger=False,
+            trigger=True,
             threshold=threshold,
         )
         all_predictions.extend(outputs_gathered)
@@ -98,12 +98,15 @@ def test_one(
             event_list = DedupList()
             for event in pred_events:
                 final_event = {
-                    "event_type": event[0][0], "arguments": DedupList()}
+                    "event_type": event[0][0], "trigger":"", "trigger_start_index":"", "arguments": DedupList()}
                 for argu in event:
                     if argu[1] != "触发词":
                         final_event["arguments"].append(
                             {"role": argu[1], "argument": argu[2]}
                         )
+                    else:
+                        final_event["trigger"] = argu[2]
+                        final_event["trigger_start_index"] = argu[3].split(";")[0]
                 event_list = [
                     event for event in event_list if not isin(event, final_event)
                 ]
