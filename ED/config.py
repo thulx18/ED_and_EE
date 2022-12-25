@@ -18,7 +18,6 @@ class Config:
         parser.add_argument('--dropout_prob', default=0.1, type=float, help='drop out probability')
         parser.add_argument('--lr', default=2e-4, type=float, help='learning rate for the bert module')
         parser.add_argument('--bert_lr', default=2e-5, type=float,  help='learning rate for the module except bert')
-        parser.add_argument('--max_grad_norm', default=1.0, type=float, help='max grad clip')
         parser.add_argument('--warmup_proportion', default=0.1, type=float)
         parser.add_argument('--weight_decay', default=0.01, type=float)
         parser.add_argument('--adam_epsilon', default=1e-8, type=float)
