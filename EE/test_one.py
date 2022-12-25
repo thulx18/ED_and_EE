@@ -32,7 +32,7 @@ def test_one(
     write_predictions=True,
 ):
     model.eval()
-    test_result = ""
+    result, test_result = [], ""
     all_predictions = []
     for batch in tqdm(
         dev_dataloader,
@@ -113,21 +113,88 @@ def test_one(
                 if not any([isin(final_event, event) for event in event_list]):
                     event_list.append(final_event)
 
-            l = json.dumps(
-                {"text": texts, "event_list": event_list}, ensure_ascii=False
-            )
+            result_event = {"text": texts, "event_list": event_list}
+            l = json.dumps(result_event, ensure_ascii=False)
             f.write(l + "\n")
             test_result = test_result + l + "\n"
-
-    e_f1, e_pr, e_rc = 2 * ex / (ey + ez), ex / ey, ex / ez
-    a_f1, a_pr, a_rc = 2 * ax / (ay + az), ax / ay, ax / az
+            result.append(result_event)
 
     if write_predictions:
         f.close()
 
     model.train()
 
-    return test_result
+    return result
+
+def infer(data):
+    args = parse_args()
+    accelerator = Accelerator()
+    if args.seed is not None:
+        set_seed(args.seed)
+    labels = []
+    with open(os.path.join(args.file_path, "duee_event_schema.json"), "r", encoding="utf-8") as f:
+        for l in f:
+            l = json.loads(l)
+            t = l["event_type"]
+            for r in ["触发词"] + [s["role"] for s in l["role_list"]]:
+                labels.append((t, r))
+    args.labels = labels
+    args.num_labels = len(labels)
+    tokenizer_name = (
+        args.tokenizer_name
+        if args.tokenizer_name is not None
+        else args.pretrained_model_name_or_path
+    )
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+    model = get_auto_model(args.model_type).from_pretrained(
+        args.pretrained_model_name_or_path,
+        num_labels=args.num_labels,
+        cache_dir=args.model_cache_dir,
+        use_efficient=args.use_efficient,
+    )
+    # transfer single_data to file
+    with open(os.path.join(args.file_path, "duee_test.json"), 'w', encoding='utf-8') as fw:
+        for d in data:
+            json.dump({'text': d['text'], 'id': '', 'event_list': []}, fw, ensure_ascii=False)
+            fw.write('\n')
+    test_dataloader = get_dataloader_and_test_dataset(
+        args,
+        tokenizer,
+        labels,
+        use_fp16=accelerator.use_fp16,
+        text_column_name="text",
+        label_column_name="events",
+    )
+
+    no_decay = ["bias", "LayerNorm.weight", "norm"]
+    optimizer_grouped_parameters = [
+        {
+            "params": [
+                p
+                for n, p in model.named_parameters()
+                if not any(nd in n for nd in no_decay)
+            ],
+            "weight_decay": args.weight_decay,
+        },
+        {
+            "params": [
+                p
+                for n, p in model.named_parameters()
+                if any(nd in n for nd in no_decay)
+            ],
+            "weight_decay": 0.0,
+        },
+    ]
+    optimizer = torch.optim.AdamW(
+        optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon
+    )
+    model, optimizer, test_dataloader= accelerator.prepare(
+        model, optimizer, test_dataloader
+    )
+    state_dict=torch.load('./outputs/last.pth')
+    model.load_state_dict(state_dict)
+    result = test_one(args, model, test_dataloader, accelerator, 0, 0, True)
+    return result
 
 def main():
     args = parse_args()

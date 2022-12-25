@@ -16,7 +16,13 @@ def get_label(args):
             line = fr.readline()
     return label
 
-def infer_single(args, model, single_data, k):
+args = Config()
+model = torch.load(os.path.join(args.output_dir, f'{args.model_name}.model'))
+if args.gpu >= 0:
+    model = torch.nn.parallel.DataParallel(model.to(args.device))
+id2label = get_label(args)
+
+def infer_single(single_data, k):
     '''
     single_data format: {
         'text': TEXT,
@@ -51,19 +57,13 @@ def infer_single(args, model, single_data, k):
                     preds.append(p)
     results = []
     for i in range(len(probs)):
-        results.append((probs[i], preds[i], trigger_list[i]['trigger']))
-    results.sort(key=lambda x: x[0], reverse=True)
+        results.append((i, probs[i], id2label[preds[i]], trigger_list[i]['trigger']))
+    results.sort(key=lambda x: x[1], reverse=True)
     results = results[:k]
     return results    
     
 
 if __name__ == '__main__':
-    args = Config()
-    model = torch.load(os.path.join(args.output_dir, f'{args.model_name}.model'))
-    if args.gpu >= 0:
-        model = torch.nn.parallel.DataParallel(model.to(args.device))
-    id2label = get_label(args)
-
     single_data = {
         'text': '雀巢裁员4000人：时代抛弃你时，连招呼都不会打！',
         'trigger_list': [
@@ -73,6 +73,5 @@ if __name__ == '__main__':
     }
 
     results = infer_single(args, model, single_data, 1)
-    for i, (prob, pred, trigger) in enumerate(results):
-        event_type = id2label[pred]
-        print(f'Predict {i} # event_type: {event_type} , trigger: {trigger}, probability: {prob:.2%}')
+    for i, (_, prob, pred, trigger) in enumerate(results):
+        print(f'Predict {i} # event_type: {pred} , trigger: {trigger}, probability: {prob:.2%}')
