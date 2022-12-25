@@ -9,4 +9,10 @@
 - **chinese-roberta-wwm-ext：** [huggingface/hfl/chinese-roberta-wwm-ext](https://huggingface.co/hfl/chinese-roberta-wwm-ext)
 
 
+#### 3. 样例输出
 
+截至6月18日13时20分，四川省宜宾市长宁县6.0级地震已造成13人遇难。
+# Event 0 || type: 灾害/意外-地震 , trigger: 地震
+#   Argument:
+      死亡人数 : 13人
+      震级 : 6.0级
