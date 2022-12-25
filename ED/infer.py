@@ -16,7 +16,7 @@ def get_label(args):
             line = fr.readline()
     return label
 
-def infer_single(args, model, single_data):
+def infer_single(args, model, single_data, k):
     '''
     single_data format: {
         'text': TEXT,
@@ -28,6 +28,7 @@ def infer_single(args, model, single_data):
             ...
         ]
     }
+    k: num of events to return
     '''
     trigger_list = single_data['trigger_list']
     data = DuEEDataset([single_data], args)
@@ -48,12 +49,13 @@ def infer_single(args, model, single_data):
                 if p != 0:
                     probs.append(out[i][p])
                     preds.append(p)
-        max_prob, best_pred, best_trigger = 0, 0, ''
-        for i, prob in enumerate(probs):
-            if prob > max_prob:
-                max_prob, best_pred, best_trigger = prob, preds[i], trigger_list[i]['trigger']
+    results = []
+    for i in range(len(probs)):
+        results.append((probs[i], preds[i], trigger_list[i]['trigger']))
+    results.sort(key=lambda x: x[0], reverse=True)
+    results = results[:k]
+    return results    
     
-    return max_prob, best_pred, best_trigger
 
 if __name__ == '__main__':
     args = Config()
@@ -69,7 +71,8 @@ if __name__ == '__main__':
             {'trigger': '抛弃', 'trigger_start_index': 10}
         ]
     }
-    
-    prob, pred, trigger = infer_single(args, model, single_data)
-    event_type = id2label[pred]
-    print(f'Predict event_type: {event_type} , trigger: {trigger}, probability: {prob:.2%}')
+
+    results = infer_single(args, model, single_data, 1)
+    for i, (prob, pred, trigger) in enumerate(results):
+        event_type = id2label[pred]
+        print(f'Predict {i} # event_type: {event_type} , trigger: {trigger}, probability: {prob:.2%}')

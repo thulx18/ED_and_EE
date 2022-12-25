@@ -4,7 +4,6 @@ import jieba
 import torch
 from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import BertTokenizer
-from tqdm import tqdm
 
 
 class DuEEDataset(Dataset):
@@ -42,7 +41,7 @@ class DuEEDataset(Dataset):
 
     def get_examples(self, raw_data):
         examples = []
-        for raw in tqdm(raw_data):
+        for raw in raw_data:
             text = raw['text']
             if 'event_list' in raw:
                 event_list = raw['event_list']
@@ -118,7 +117,7 @@ class DuEEDataset(Dataset):
     def get_features(self, examples):
         tokenizer = BertTokenizer.from_pretrained(self.bert_dir)
         features = []
-        for example in tqdm(examples):
+        for example in examples:
             tokens, triggerL, triggerR = example['tokens'], example['triggerL'], example['triggerR']
             textL = tokenizer.tokenize("".join(tokens[:triggerL]))
             textR = ['[unused0]']
