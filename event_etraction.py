@@ -2,6 +2,10 @@ from ED.infer import infer_single
 from EE.test_one import infer
 
 def event_extraction(data):
+    '''
+    data format: list
+    ['TEXT1', 'TEXT2', ... ]
+    '''
     ae_result = infer(data)
     results = []
     for data in ae_result:

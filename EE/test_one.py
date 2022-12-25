@@ -153,7 +153,7 @@ def infer(data):
     # transfer single_data to file
     with open(os.path.join(args.file_path, "duee_test.json"), 'w', encoding='utf-8') as fw:
         for d in data:
-            json.dump({'text': d['text'], 'id': '', 'event_list': []}, fw, ensure_ascii=False)
+            json.dump({'text': d, 'id': '', 'event_list': []}, fw, ensure_ascii=False)
             fw.write('\n')
     test_dataloader = get_dataloader_and_test_dataset(
         args,
