@@ -1,9 +1,16 @@
 __pycache__
 logs
 checkpoints
-outputs
+
+outputs/*
+a/
+e/
+logs/
+*.pth
 *.json
 *.pkl
+!test_result.json
+test.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

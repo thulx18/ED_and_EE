@@ -12,11 +12,11 @@ from fastcore.all import *
 from tqdm.auto import tqdm
 from transformers import AutoTokenizer, get_scheduler, set_seed
 
-from models import get_auto_model
-from utils.args import parse_args
-from utils.data import get_dataloader_and_dataset, get_dataloader_and_test_dataset
-from utils.postprocess import DedupList, isin, postprocess_gplinker
-from utils.utils import get_writer, try_remove_old_ckpt, write_json
+from .models import get_auto_model
+from .utils.args import parse_args
+from .utils.data import get_dataloader_and_dataset, get_dataloader_and_test_dataset
+from .utils.postprocess import DedupList, isin, postprocess_gplinker
+from .utils.utils import get_writer, try_remove_old_ckpt, write_json
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +130,7 @@ def infer(data):
     if args.seed is not None:
         set_seed(args.seed)
     labels = []
-    with open(os.path.join(args.file_path, "duee_event_schema.json"), "r", encoding="utf-8") as f:
+    with open("/home/lixiang/ED_and_EE/EE/data/duee_event_schema.json", "r", encoding="utf-8") as f:
         for l in f:
             l = json.loads(l)
             t = l["event_type"]
@@ -151,9 +151,9 @@ def infer(data):
         use_efficient=args.use_efficient,
     )
     # transfer single_data to file
-    with open(os.path.join(args.file_path, "duee_test.json"), 'w', encoding='utf-8') as fw:
+    with open("/home/lixiang/ED_and_EE/EE/data/duee_test.json", 'w', encoding='utf-8') as fw:
         for d in data:
-            json.dump({'text': d, 'id': '', 'event_list': []}, fw, ensure_ascii=False)
+            json.dump(d, fw, ensure_ascii=False)
             fw.write('\n')
     test_dataloader = get_dataloader_and_test_dataset(
         args,
@@ -189,7 +189,7 @@ def infer(data):
     model, optimizer, test_dataloader= accelerator.prepare(
         model, optimizer, test_dataloader
     )
-    state_dict=torch.load('./outputs/last.pth')
+    state_dict=torch.load('/home/lixiang/ED_and_EE/EE/outputs/last.pth')
     model.load_state_dict(state_dict)
     result = test_one(args, model, test_dataloader, accelerator, 0, 0, True)
     return result

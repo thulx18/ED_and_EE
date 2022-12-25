@@ -10,13 +10,13 @@ class DuEEDataset(Dataset):
     def __init__(self, data, args):
         self.num_class = args.num_class
         self.max_len = args.max_seq_len
-        self.bert_dir = args.bert_dir
+        self.bert_dir = "/home/lixiang/bd/RoBERTa_zh_Large_PyTorch/"
         # get label map
         self.label2id = {}
-        label_path = os.path.join(args.data_dir, 'labels.txt')
+        label_path = "/home/lixiang/ED_and_EE/ED/data/labels.txt"
         if not os.path.exists(label_path):
             labels = []
-            with open(os.path.join(args.data_dir, 'event_schema.json'), 'r', encoding='utf-8') as fr:
+            with open("/home/lixiang/ED_and_EE/ED/data/raw_data/event_schema.json", 'r', encoding='utf-8') as fr:
                 line = fr.readline()
                 while line:
                     d = json.loads(line.strip())
@@ -96,7 +96,7 @@ class DuEEDataset(Dataset):
                     trigger_word = trigger['trigger']
                     offset = len(trigger_word) - len(trigger_word.lstrip())
                     trigger_word = trigger_word.lstrip()
-                    trigger_start_index = trigger['trigger_start_index'] + offset
+                    trigger_start_index = int(trigger['trigger_start_index']) + offset
                     trigger_end_index = trigger_start_index + len(trigger_word) + offset
 
                     tokensL = jieba.lcut(text[:trigger_start_index])

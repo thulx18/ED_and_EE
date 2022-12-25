@@ -4,12 +4,14 @@ import numpy as np
 import torch
 import  torch.nn.functional as F
 from torch.utils.data import DataLoader, SequentialSampler
-from config import Config
-from data_helper import DuEEDataset
+from .config import Config
+from .data_helper import DuEEDataset
+from .model import DMBERT
+
 
 def get_label(args):
     label = []
-    with open(os.path.join(args.data_dir, 'labels.txt'), 'r', encoding='utf-8') as fr:
+    with open("/home/lixiang/ED_and_EE/ED/data/labels.txt", 'r', encoding='utf-8') as fr:
         line = fr.readline()
         while line:
             label.append(line.strip())
@@ -17,7 +19,10 @@ def get_label(args):
     return label
 
 args = Config()
-model = torch.load(os.path.join(args.output_dir, f'{args.model_name}.model'))
+# model = torch.load(os.path.join(args.output_dir, f'{args.model_name}.model'))
+model = DMBERT(args)
+state_dict = torch.load("/home/lixiang/ED_and_EE/ED/checkpoints/DMBERT.pth")
+model.load_state_dict(state_dict)
 if args.gpu >= 0:
     model = torch.nn.parallel.DataParallel(model.to(args.device))
 id2label = get_label(args)

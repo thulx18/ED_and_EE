@@ -5,7 +5,7 @@ import os
 from datasets import Dataset
 from torch.utils.data import DataLoader
 
-from utils.collate import DataCollatorForGPLinkerDuEE
+from .collate import DataCollatorForGPLinkerDuEE
 
 logger = logging.getLogger(__name__)
 
@@ -179,9 +179,9 @@ def get_dataloader_and_test_dataset(
     text_column_name="text",
     label_column_name="events",
 ):
-    train_raw_dataset = Dataset.from_json(os.path.join(args.file_path, "duee_train.json"))
+    train_raw_dataset = Dataset.from_json("/home/lixiang/ED_and_EE/EE/data/duee_train.json")
     train_ds = train_raw_dataset.map(duee_v1_process)
-    dev_raw_dataset = Dataset.from_json(os.path.join(args.file_path, "duee_test.json"))
+    dev_raw_dataset = Dataset.from_json("/home/lixiang/ED_and_EE/EE/data/duee_test.json")
     dev_ds = dev_raw_dataset.map(duee_v1_process)
 
     def tokenize_and_align_train_labels(examples):

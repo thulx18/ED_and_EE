@@ -9,13 +9,13 @@ from transformers import BertModel
 class DMBERT(nn.Module):
     def __init__(self, args):
         super(DMBERT, self).__init__()
-        self.bert = BertModel.from_pretrained(args.bert_dir, output_hidden_states=True)
+        self.bert = BertModel.from_pretrained("/home/lixiang/bd/RoBERTa_zh_Large_PyTorch/", output_hidden_states=True)
         self.bert_config = self.bert.config
         self.out_dims = self.bert_config.hidden_size
 
         self.drop_out = nn.Dropout(args.dropout_prob)
         self.max_pooling = nn.MaxPool1d(args.max_seq_len)
-        self.fc = nn.Linear(self.out_dims*2, args.num_class)
+        self.classifier = nn.Linear(self.out_dims*2, args.num_class)
 
     def forward(self, data):
         token_ids = data['input_ids']
@@ -37,6 +37,6 @@ class DMBERT(nn.Module):
         pooled = pooled - torch.ones_like(pooled)
         # classify
         pooled = self.drop_out(pooled)
-        logits = self.fc(pooled)    # bs * num_class
+        logits = self.classifier(pooled)    # bs * num_class
 
         return label, logits

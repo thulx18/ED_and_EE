@@ -9,6 +9,7 @@ def event_extraction(data):
     ae_result = infer(data)
     results = []
     for data in ae_result:
+        print(data)
         text = data['text']
         event_list, trigger_list = [], []
         for event in data['event_list']:
@@ -18,7 +19,7 @@ def event_extraction(data):
             event_list.append({
                 'event_type': '',
                 'trigger': trigger,
-                'arguments': data['arguments']
+                'arguments': event['arguments']
             })
         single_data = {'text': text, 'trigger_list': trigger_list}
         ed_result = infer_single(single_data, len(trigger_list))
