@@ -1,4 +1,4 @@
-accelerate launch train.py \
+accelerate launch test_one.py \
     --model_type bert \
     --pretrained_model_name_or_path hfl/chinese-roberta-wwm-ext \
     --logging_steps 5000 \

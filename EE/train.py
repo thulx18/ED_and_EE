@@ -330,6 +330,7 @@ def main():
                         )
                     )
                     logging_loss = tr_loss
+                    torch.save(model.state_dict(),'./outputs/last.pth')
 
                 if (
                     args.save_steps > 0 and global_steps % args.save_steps == 0 and loss <= 3.  # 当loss太大时，预测是没有意义的。
